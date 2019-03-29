@@ -2,6 +2,10 @@
 import random
 import os, sys
 from PIL import Image
+from tkinter import filedialog
+
+
+
 
 # ***** Encryption / Decryption selection *****
 def main():
@@ -21,7 +25,7 @@ def main():
 # Encryption Object selection
 def modeEncryption():
    print("\n*Encryption mode enabled*")
-   mode_encr = input("Enter number to encrypt:\n[1] - Single message\n[2] - Text or csv file\n[3] - PNG Image\nSelection: ")
+   mode_encr = input("Enter number to encrypt:\n[1] - Single message\n[2] - Plain text file\n[3] - PNG Image\nSelection: ")
 
    try:
       mode_encr = int(mode_encr)
@@ -52,23 +56,28 @@ def singleMessage():
 
 # Text file encryption mode
 def txtFile():
-      fileName = input("\nEnter name of the file: ")
+      # File dialog window
+      # Relative path location is the directory in which script is located
+      txtFile = filedialog.askopenfilename(  initialdir = os.path.join(sys.path[0]), 
+                                             title = "Select plain text file",
+                                             filetypes = (("Text files","*.txt"),
+                                                          ("CSV files","*.csv"),
+                                                          ("All files","*.*")))
 
       # Relative path location is the directory in which script is located
-      try:
-         theFile = open(os.path.join(sys.path[0], fileName), "r")
-      except FileNotFoundError:
-         print("\n" + fileName + "file does not exist.")
-         txtFile()
       
+      theFile = open(txtFile, "r")
+
       content = theFile.read()
       theFile.close()
 
-      # Initializes encryption Class Affine
+      # Initializes encryption Class Affine 
       affine = Affine()
       encryptedContent = affine.encrypt(content) # Encrypts txt file content
 
-      encryptedFileName = "[Encrypted] " + fileName     
+      txtFile = os.path.basename(txtFile) # Excludes file path
+
+      encryptedFileName = "[Encrypted] " + txtFile # New file name with label
       encryptedFile = open(os.path.join(sys.path[0], encryptedFileName), "w+") # w+ allows to create a file if it does not exist and write in it
 
       encryptedFile.write(encryptedContent) # Writes encrypted content into the created file
@@ -80,14 +89,12 @@ def txtFile():
 # The images must be mutated in a lossless format. 
 # So the encrypted/decrypted files will be saved as a .png image.
 def imageFile():
-   imageFileName = input("\nEnter name of the [PNG] image file: ")
-   
-   try:
-      im = Image.open(os.path.join(sys.path[0], imageFileName + ".png"))
-   except FileNotFoundError:
-      print("\n" + imageFileName + "file does not exist.")
-      imageFile()
+   pngFile = filedialog.askopenfilename(initialdir = os.path.join(sys.path[0]), 
+                                             title = "Select PNG file",
+                                             filetypes = (("PNG files","*.png"),
+                                                          ("All files","*.*")))
 
+   im = Image.open(pngFile)
    pixelMap = im.load()
 
    width = im.size[0]
@@ -107,8 +114,9 @@ def imageFile():
          coprime_pixel = ((c+1 if c % 2 == 0 else c) for c in pixel)
          pixelMap[i, j] = tuple(int(c**43 % 256) for c in coprime_pixel)
 
-   im.save(os.path.join(sys.path[0], "[Encrypted] " + imageFileName + ".png"))
-   print("\nImage saved as [Encrypted] " + imageFileName + ".png")
+   pngFile = os.path.basename(pngFile) #Excludes file path.
+   im.save(os.path.join(sys.path[0], "[Encrypted] " + pngFile))
+   print("\nImage saved as [Encrypted] " + pngFile)
 
 # ********** Encryption/Decryption Algorithms ***********
 
@@ -146,24 +154,25 @@ class Affine(object):
 # *** Random Random seed algorithm
 # Random seed encryption
 def seedEncryption(Msg):
-    encryptedMsg = ''
-    # List which contains is just every ASCII character (32-126) in order
-    characters_in_order = [chr(x) for x in range(32,127)]
+   encryptedMsg = ''
+   # List which contains is just every ASCII character (32-126) in order
+   characters_in_order = [chr(x) for x in range(32,127)]
 
-    # Change r_seed in order to provide different encryption value for each element
-    r_seed = input("\nEnter an integer to use as seed: ")
+   # Change r_seed in order to provide different encryption value for each element
+   r_seed = input("\nEnter an integer to use as seed: ")
+   
 
    # 'random' is used to shuffle the characters in order according to a seed.
    # As long as this seed is the same on the encryption and decryption,
    # it will produce the same shuffled list and the result.
-    random.seed(r_seed)
-    shuffled_list = [chr(x) for x in range(32,127)]
-    random.shuffle(shuffled_list)
+   random.seed(r_seed)
+   shuffled_list = [chr(x) for x in range(32,127)]
+   random.shuffle(shuffled_list)
 
-    for i in range(0, len(Msg)):
+   for i in range(0, len(Msg)):
       encryptedMsg += shuffled_list[characters_in_order.index(Msg[i])]
          
-    return encryptedMsg
+      return encryptedMsg
 
 # Random seed decryption
 def seedDecryption(Msg):
@@ -184,7 +193,7 @@ def seedDecryption(Msg):
 class Decryption:
    def __init__(self):
       print("\nDecryption mode enabled\n")
-      mode = input("Enter number to decrypt:\n[1] - Single message\n[2] - Text file\n[3] - PNG Image\nSelection: ")
+      mode = input("Enter number to decrypt:\n[1] - Single message\n[2] - Plain text file\n[3] - PNG Image\nSelection: ")
       
       self.mode = int(mode)
       self.modeDecryption(self.mode)
@@ -228,14 +237,12 @@ class Decryption:
       print('\nText file decrypted and placed in: ' + decryptedFileName)
  
    def decryptImage(self):
-      fileName = input("\nEnter name of the encrypted image file (without the [Encrypted] label): ")
-      encryptedImageName = os.path.join(sys.path[0], ("[Encrypted] " + fileName + ".png"))
-
-      try:
-         im = Image.open(encryptedImageName)
-      except FileNotFoundError:
-         print("\n" + encryptedImageName + "file does not exist.")
-         imageFile()
+      encryptedImageName = filedialog.askopenfilename(initialdir = os.path.join(sys.path[0]), 
+                                                      title = "Select PNG file",
+                                                      filetypes = (("PNG files","*.png"),
+                                                                   ("All files","*.*")))
+      
+      im = Image.open(encryptedImageName)
 
       pixelMap = im.load()
       width = im.size[0]
@@ -243,9 +250,9 @@ class Decryption:
 
       progress = 0
 
-      # iterates through each pixel
+      # Iterates through each pixel
       for i in range(width): 
-         if i % (width/10) == 0: # Prints out progress every 10 % do.
+         if i % (width/10) == 0: # Prints out progress every 10 % is done.
             progress += 10
             print("Decrypting: " + str(progress) + " %")
 
@@ -253,12 +260,15 @@ class Decryption:
             pixel = pixelMap[i, j]
             pixelMap[i, j] = tuple(int(c**3 % 256) for c in pixel)
 
-      decryptedImageName = os.path.join(sys.path[0], ("[Decrypted] " + fileName + ".png"))
-      im.save(os.path.join(sys.path[0], encryptedImageName))
+      encryptedImageName = os.path.basename(encryptedImageName) #Excludes file path.
+      newImageName = encryptedImageName.split()[1] # Removes [Encryption] label
 
-      os.rename(encryptedImageName, decryptedImageName) # Renames label [Encrypted] to [Decrypted]
+      decryptedImageName = os.path.join(sys.path[0], ("[Decrypted] " + newImageName))
+      im.save(os.path.join(sys.path[0], decryptedImageName))
+
+      #os.rename(encryptedImageName, decryptedImageName) # Renames label [Encrypted] to [Decrypted]
       print('\nImage decrypted and located in:' + decryptedImageName)
 
-########### Main ############
+# ***** Main *****
 if __name__ == '__main__':
     main()
