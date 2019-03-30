@@ -14,6 +14,7 @@ If not, install dependencies with:
 ## Usage
 Launch the script and follow up its self-explanatory process in order to encrypt/decrypt the object.
 
+
 ## Contributing
 1. Fork it!
 2. Create your feature branch: `git checkout -b my-new-feature`
