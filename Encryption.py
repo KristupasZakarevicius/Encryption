@@ -7,8 +7,7 @@ import csv
 
 # ***** Encryption / Decryption selection *****
 def main():
-   mode_selection = input("""\n\nDo you want to encrypt or decrypt the communication?\n
-                              Enter [E] for the encryption and [D] for the decryption: """)
+   mode_selection = input("""\n\nDo you want to encrypt or decrypt the communication?\nEnter [E] for the encryption and [D] for the decryption: """)
 
    if mode_selection.lower().startswith('e'):
       modeEncryption() # function is called
@@ -24,9 +23,7 @@ def main():
 # Encryption Object selection
 def modeEncryption():
    print("\n*Encryption mode enabled*")
-   mode_encr = input("""Enter number to encrypt:\n[1] - Single message
-                                                \n[2] - Plain text file
-                                                \n[3] - PNG Image\nSelection: """)
+   mode_encr = input("""Enter number to encrypt:\n[1] - Single message\n[2] - Plain text file\n[3] - PNG Image\nSelection: """)
 
    try:
       mode_encr = int(mode_encr)
@@ -195,9 +192,7 @@ def seedDecryption(Msg):
 class Decryption:
    def __init__(self):
       print("\nDecryption mode enabled\n")
-      mode = input("""Enter number to decrypt:\n[1] - Single message
-                                              \n[2] - Plain text file
-                                              \n[3] - PNG Image\nSelection: """)
+      mode = input("""Enter number to decrypt:\n[1] - Single message\n[2] - Plain text file\n[3] - PNG Image\nSelection: """)
       
       self.mode = int(mode)
       self.modeDecryption(self.mode)
